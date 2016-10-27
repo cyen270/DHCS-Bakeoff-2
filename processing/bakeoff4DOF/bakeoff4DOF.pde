@@ -8,8 +8,11 @@ float screenTransX = 0;
 float screenTransY = 0;
 float screenRotation = 0;
 float screenZ = 50f;
+float screenP = 0;
 float startX = 0;
 float startY = 0;
+boolean moveSquare = false;
+int dragSquare = 0;
 int num = 3;
 float mx[] = new float[num];
 float my[] = new float[num];
@@ -23,7 +26,7 @@ int startTime = 0; // time starts when the first click is captured
 int finishTime = 0; //records the time of the final click
 boolean userDone = false;
 
-final int screenPPI = 120; //what is the DPI of the screen you are using
+final int screenPPI = 577; //what is the DPI of the screen you are using
 //Many phones listed here: https://en.wikipedia.org/wiki/Comparison_of_high-definition_smartphone_displays 
 
 private class Target
@@ -43,7 +46,7 @@ float inchesToPixels(float inch)
 
 void setup() {
   //size does not let you use variables, so you have to manually compute this
-  size(400, 700); //set this, based on your sceen's PPI to be a 2x3.5" area.
+  size(1154, 2020); //set this, based on your sceen's PPI to be a 2x3.5" area.
 
   rectMode(CENTER);
   textFont(createFont("Arial", inchesToPixels(.15f))); //sets the font to Arial that is .3" tall
@@ -99,22 +102,25 @@ void draw() {
   Target t = targets.get(trialIndex);
   float newSize = 3 * t.z;
 
-
   translate(t.x, t.y); //center the drawing coordinates to the center of the screen
   translate(screenTransX, screenTransY); //center the drawing coordinates to the center of the screen
   
-
-  rotate(radians(t.rotation));
+  rotate(radians(t.rotation+screenRotation));
   fill(0);
   
-  
-
   noFill();
   stroke(255);
   strokeWeight(5);
   ellipse(0, 0, newSize, newSize);
   noStroke();
-  fill(255, 0, 0); //set color to semi translucent
+  if(checkForSuccess())
+  {
+    fill(0, 255, 0);  
+  }
+  else
+  {
+    fill(255, 0, 0); //set color to semi translucent
+  }
   rect(0, 0, t.z, t.z);
 
   popMatrix();
@@ -122,7 +128,6 @@ void draw() {
   //===========DRAW TARGETTING SQUARE=================
   pushMatrix();
   translate(width/2, height/2); //center the drawing coordinates to the center of the screen
-  rotate(radians(screenRotation));
   startX = mouseX;
   startY = mouseY;
   
@@ -135,9 +140,10 @@ void draw() {
 
   popMatrix();
 
-  //scaffoldControlLogic(); //you are going to want to replace this!
+  scaffoldControlLogic(); //you are going to want to replace this!
 
-  text("Trial " + (trialIndex+1) + " of " +trialCount, width/2, inchesToPixels(.5f));
+  text("Trial " + (trialIndex+1) + " of " +trialCount, width/2, inchesToPixels(.2f));
+  text("Ok", width/2 ,height-inchesToPixels(.2f));
 }
 
 boolean inCircle(float x, float y, float size) {
@@ -150,99 +156,94 @@ boolean inSquare(float x, float y, float size) {
   return false;
 }
 
+//int onEdges(float x, float y, float size) {
+//  int edgenum = 0;
+//  if ((abs(mouseX - x) < 30) && (abs(mouseY - y) < 30)) {
+//    edgenum = 1;  
+//  }
+//  else if ((abs(mouseX - (x + size)) < 30) && (abs(mouseY - y) < 30)) {
+//    edgenum = 2;  
+//  }
+//  else if ((abs(mouseX - x) < 30) && (abs(mouseY - (y + size)) < 30)) {
+//    edgenum = 3;  
+//  }
+//  else if ((abs(mouseX - (x + size)) < 30) && (abs(mouseY - (y + size)) < 30)) {
+//    edgenum = 4;  
+//  }
+//  return edgenum;
+//}
+
 void mouseDragged() {
-  Target t = targets.get(trialIndex);
-  float newSize = 3 * t.z;
-  float x = width / 2 + t.x + screenTransX;
-  float y = height / 2 + t.y + screenTransY;
-  float vecx1 = mx[num-2] - x;
-  float vecy1 = my[num-2] - y;
-  float vecx2 = mx[num-1] - x;
-  float vecy2 = my[num-1] - y;
-  float crossprod = vecx1 * vecy2 - vecy1 * vecx2;
-  if (inCircle(x, y, newSize) && !inSquare(x, y, t.z)) {
-    if (crossprod > 0) screenRotation += 2.5;
-    else screenRotation -= 2.5;
-    //screenRotation += abs(atan((mouseY - y) / (mouseX - x)));
-    //if (mouseX > x && mouseY > y) {
-    //  screenRotation -= asin((mouseX - ;
-    //}
-    //else if (mouseX < x && mouseY > y) {
-    //  screenRotation -= (mx[num-1] - mx[num-2]) * (50 / t.z);
-    //}
-    //else if (mouseX < x && mouseY < y) {
-    //  screenRotation += (mx[num-1] - mx[num-2]) * (50 / t.z);
-    //}
-    //else if (mouseX > x && mouseY < y) {
-    //  screenRotation += (mx[num-1] - mx[num-2]) * (50 / t.z);
-    //}
+  if(trialIndex < targets.size())
+  {
+    Target t = targets.get(trialIndex);
+    float newSize = 3 * t.z;
+    float x = width / 2 + t.x + screenTransX;
+    float y = height / 2 + t.y + screenTransY;
+    float vecx1 = mx[num-2] - x;
+    float vecy1 = my[num-2] - y;
+    float vecx2 = mx[num-1] - x;
+    float vecy2 = my[num-1] - y;
+    float crossprod = vecx1 * vecy2 - vecy1 * vecx2;
+    if(moveSquare) {
+      screenTransX = mouseX - (width / 2 + t.x);
+      screenTransY = mouseY - (height / 2 + t.y);
+    }
+    else if (inCircle(x, y, newSize) && !inSquare(x, y, t.z)) {
+      if (crossprod > 0) screenRotation += 2.5;
+      else screenRotation -= 2.5;
+    }
+  }
+}
+
+void mousePressed() {
+  if(trialIndex < targets.size())
+  {
+    Target t = targets.get(trialIndex);
+    float x = width / 2 + t.x + screenTransX;
+    float y = height / 2 + t.y + screenTransY;
+    if(inSquare(x, y, t.z) && dragSquare == 0)
+    {
+      moveSquare = true;
+    }
+    else if(dist(width/2, height, mouseX, mouseY) < inchesToPixels(.5f)) {
+      if (userDone==false && !checkForSuccess())
+        errorCount++;
+  
+      //and move on to next trial
+      trialIndex++;
+  
+      screenTransX = 0;
+      screenTransY = 0;
+  
+      if (trialIndex==trialCount && userDone==false)
+      {
+        userDone = true;
+        finishTime = millis();
+      }
+    }
   }
 }
 
 
-//void scaffoldControlLogic()
-//{
-//  //upper left corner, rotate counterclockwise
-//  text("CCW", inchesToPixels(.2f), inchesToPixels(.2f));
-//  if (mousePressed && dist(0, 0, mouseX, mouseY)<inchesToPixels(.5f))
-//    screenRotation--;
+void scaffoldControlLogic()
+{
 
-//  //upper right corner, rotate clockwise
-//  text("CW", width-inchesToPixels(.2f), inchesToPixels(.2f));
-//  if (mousePressed && dist(width, 0, mouseX, mouseY)<inchesToPixels(.5f))
-//    screenRotation++;
+  //lower left corner, decrease Z
+  text("+", width - inchesToPixels(.2f), height/2-inchesToPixels(.5f));
+  if (mousePressed && dist(width, height/2-inchesToPixels(.2f), mouseX, mouseY)<inchesToPixels(.5f))
+    screenZ+=inchesToPixels(.02f);
 
-//  //lower left corner, decrease Z
-//  text("-", inchesToPixels(.2f), height-inchesToPixels(.2f));
-//  if (mousePressed && dist(0, height, mouseX, mouseY)<inchesToPixels(.5f))
-//    screenZ-=inchesToPixels(.02f);
-
-//  //lower right corner, increase Z
-//  text("+", width-inchesToPixels(.2f), height-inchesToPixels(.2f));
-//  if (mousePressed && dist(width, height, mouseX, mouseY)<inchesToPixels(.5f))
-//    screenZ+=inchesToPixels(.02f);
-
-//  //left middle, move left
-//  text("left", inchesToPixels(.2f), height/2);
-//  if (mousePressed && dist(0, height/2, mouseX, mouseY)<inchesToPixels(.5f))
-//    screenTransX-=inchesToPixels(.02f);
-//  ;
-
-//  text("right", width-inchesToPixels(.2f), height/2);
-//  if (mousePressed && dist(width, height/2, mouseX, mouseY)<inchesToPixels(.5f))
-//    screenTransX+=inchesToPixels(.02f);
-//  ;
-
-//  text("up", width/2, inchesToPixels(.2f));
-//  if (mousePressed && dist(width/2, 0, mouseX, mouseY)<inchesToPixels(.5f))
-//    screenTransY-=inchesToPixels(.02f);
-//  ;
-
-//  text("down", width/2, height-inchesToPixels(.2f));
-//  if (mousePressed && dist(width/2, height, mouseX, mouseY)<inchesToPixels(.5f))
-//    screenTransY+=inchesToPixels(.02f);
-//  ;
-//}
+  text("-", width-inchesToPixels(.2f), height/2+inchesToPixels(.5f));
+  if (mousePressed && dist(width, height/2, mouseX, mouseY)<inchesToPixels(.5f))
+    screenZ-=inchesToPixels(.02f);
+}
 
 void mouseReleased()
 {
-  //check to see if user clicked middle of screen
-  if (dist(width/2, height/2, mouseX, mouseY)<inchesToPixels(.5f))
+  if(moveSquare)
   {
-    if (userDone==false && !checkForSuccess())
-      errorCount++;
-
-    //and move on to next trial
-    trialIndex++;
-
-    screenTransX = 0;
-    screenTransY = 0;
-
-    if (trialIndex==trialCount && userDone==false)
-    {
-      userDone = true;
-      finishTime = millis();
-    }
+    moveSquare = !moveSquare;
   }
 }
 
@@ -250,11 +251,11 @@ public boolean checkForSuccess()
 {
 	Target t = targets.get(trialIndex);	
 	boolean closeDist = dist(t.x,t.y,-screenTransX,-screenTransY)<inchesToPixels(.05f); //has to be within .1"
-  boolean closeRotation = calculateDifferenceBetweenAngles(t.rotation,screenRotation)<=5;
+  boolean closeRotation = calculateDifferenceBetweenAngles(t.rotation+screenRotation,0)<=5;
 	boolean closeZ = abs(t.z - screenZ)<inchesToPixels(.05f); //has to be within .1"	
 	
   println("Close Enough Distance: " + closeDist);
-  println("Close Enough Rotation: " + closeRotation + "(dist="+calculateDifferenceBetweenAngles(t.rotation,screenRotation)+")");
+  println("Close Enough Rotation: " + closeRotation + "(dist="+calculateDifferenceBetweenAngles(t.rotation,0)+")");
 	println("Close Enough Z: " + closeZ);
 	
 	return closeDist && closeRotation && closeZ;	
