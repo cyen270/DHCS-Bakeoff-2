@@ -213,7 +213,7 @@ void mouseDragged() {
     float vecy2 = my[num-1] - y;
     float crossprod = vecx1 * vecy2 - vecy1 * vecx2;
     
-    if(inSquare(mouseX, mouseY, x, y, t.z)) {
+    if(moveSquare) {
       screenTransX = mouseX - (width / 2 + t.x);
       screenTransY = mouseY - (height / 2 + t.y);
     }
@@ -236,7 +236,11 @@ void mousePressed() {
     Target t = targets.get(trialIndex);
     float x = width / 2 + t.x + screenTransX;
     float y = height / 2 + t.y + screenTransY;
-    if(mouseY >= (height - 100)) {
+    if(inSquare(mouseX, mouseY, x, y, t.z))
+    {
+      moveSquare = true;
+    }
+    else if(mouseY >= (height - 100)) {
       if (userDone==false && !checkForSuccess())
         errorCount++;
   
