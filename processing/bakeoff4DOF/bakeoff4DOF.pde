@@ -24,7 +24,7 @@ int startTime = 0; // time starts when the first click is captured
 int finishTime = 0; //records the time of the final click
 boolean userDone = false;
 
-final int screenPPI = 577; //what is the DPI of the screen you are using
+final int screenPPI = 120; //what is the DPI of the screen you are using
 //Many phones listed here: https://en.wikipedia.org/wiki/Comparison_of_high-definition_smartphone_displays 
 
 private class Target
@@ -44,7 +44,7 @@ float inchesToPixels(float inch)
 
 void setup() {
   //size does not let you use variables, so you have to manually compute this
-  size(1154, 2020); //set this, based on your sceen's PPI to be a 2x3.5" area.
+  size(400, 700); //set this, based on your sceen's PPI to be a 2x3.5" area.
 
   rectMode(CENTER);
   textFont(createFont("Arial", inchesToPixels(.15f))); //sets the font to Arial that is .3" tall
@@ -69,8 +69,8 @@ void setup() {
 
 void draw() {
 
-  background(60); //background is dark grey
-  fill(200);
+  background(0); //background is dark grey
+  fill(255);
   noStroke();
 
   if (startTime == 0)
@@ -94,35 +94,7 @@ void draw() {
   mx[num-1] = mouseX;
   my[num-1] = mouseY;
 
-  //===========DRAW TARGET SQUARE=================
-  pushMatrix();
-  translate(width/2, height/2); //center the drawing coordinates to the center of the screen
-
-  Target t = targets.get(trialIndex);
-  float newSize = 3 * t.z;
-
-  translate(t.x, t.y); //center the drawing coordinates to the center of the screen
-  translate(screenTransX, screenTransY); //center the drawing coordinates to the center of the screen
   
-  rotate(radians(t.rotation+screenRotation));
-  fill(0);
-  
-  noFill();
-  stroke(255);
-  strokeWeight(5);
-  ellipse(0, 0, newSize, newSize);
-  noStroke();
-  if(checkForSuccess())
-  {
-    fill(0, 255, 0);  
-  }
-  else
-  {
-    fill(255, 0, 0); //set color to semi translucent
-  }
-  rect(0, 0, t.z, t.z);
-
-  popMatrix();
 
   //===========DRAW TARGETTING SQUARE=================
   pushMatrix();
@@ -134,28 +106,66 @@ void draw() {
   //custom shifts:
   //translate(screenTransX,screenTransY); //center the drawing coordinates to the center of the screen
   rotate(radians(-1));
-  fill(255, 128); //set color to semi translucent
+  fill(255); //set color to semi translucent
   rect(0, 0, screenZ, screenZ);
 
   popMatrix();
   
-  if(checkForDistance()) fill(0,255,0);
-  else fill(255,0,0);
-  ellipse(width/2, inchesToPixels(.4f), 100, 100);
-  if(checkForRotation()) fill(0,255,0);
-  else fill(255,0,0);
+  
+  if(checkForDistance()) fill(0,200,0);
+  else fill(200,0,0);
   ellipse(width/2 - 150, inchesToPixels(.4f), 100, 100);
-  if(checkForSize()) fill(0,255,0);
-  else fill(255,0,0);
+  if(checkForRotation()) fill(0,200,0);
+  else fill(200,0,0);
+  ellipse(width/2, inchesToPixels(.4f), 100, 100);
+  if(checkForSize()) fill(0,200,0);
+  else fill(200,0,0);
   ellipse(width/2 + 150, inchesToPixels(.4f), 100, 100);
-  fill(255,128);
+  fill(255);
   textSize(35);
   text("Position", width/2 - 150,inchesToPixels(.6f));
   text("Rotation", width/2,inchesToPixels(.6f));
   text("Size", width/2 + 150,inchesToPixels(.6f));
-  textSize(100);  
+  textSize(100); 
+  fill(200);
   text("Trial " + (trialIndex+1) + " of " +trialCount, width/2, inchesToPixels(.2f));
-  text("Ok", width/2 ,height-inchesToPixels(.2f));
+  if(checkForSuccess()) fill(0,200,0);
+  else fill(200,0,0);
+  rect(width/2, height-50, width - 50, 75);
+  fill(255);
+  textSize(50);
+  text("Next", width/2 ,height-37.5);
+  
+  
+  //===========DRAW TARGET SQUARE=================
+  pushMatrix();
+  translate(width/2, height/2); //center the drawing coordinates to the center of the screen
+
+  Target t = targets.get(trialIndex);
+  float newSize = t.z * 3;
+
+  translate(t.x, t.y); //center the drawing coordinates to the center of the screen
+  translate(screenTransX, screenTransY); //center the drawing coordinates to the center of the screen
+  
+  rotate(radians(t.rotation+screenRotation));
+  fill(255);
+  
+  noFill();
+  stroke(255, 200, 0);
+  strokeWeight(5);
+  ellipse(0, 0, newSize, newSize);
+  noStroke();
+  if(checkForSuccess())
+  {
+    fill(0, 255, 0);  
+  }
+  else
+  {
+    fill(255, 200, 0); 
+  }
+  rect(0, 0, t.z, t.z);
+
+  popMatrix();
 }
 
 boolean inCircle(float x1, float y1, float x2, float y2, float size) {
@@ -169,7 +179,7 @@ boolean onCircle(float x1, float y1, float x2, float y2, float size) {
 }
 
 boolean inSquare(float x2, float y2, float x1, float y1, float size) {
-  if ((abs(x2 - x1) <= size) && (abs(y2 - y1) <= size)) return true;
+  if ((abs(x2 - x1) <= size * sqrt(2) / 2.0) && (abs(y2 - y1) <= size * sqrt(2) / 2.0)) return true;
   return false;
 }
 
@@ -203,7 +213,7 @@ void mouseDragged() {
     float vecy2 = my[num-1] - y;
     float crossprod = vecx1 * vecy2 - vecy1 * vecx2;
     
-    if(moveSquare) {
+    if(inSquare(mouseX, mouseY, x, y, t.z)) {
       screenTransX = mouseX - (width / 2 + t.x);
       screenTransY = mouseY - (height / 2 + t.y);
     }
@@ -214,8 +224,8 @@ void mouseDragged() {
       t.z+=dist(mouseX,mouseY,x,y)-(newSize/2.0);
     }
     else if (inCircle(mouseX, mouseY, x, y, newSize) && !inSquare(mouseX, mouseY, x, y, t.z)) { 
-      if (crossprod > 0) screenRotation += 2.5;
-      else screenRotation -= 2.5;
+      if (crossprod > 0) screenRotation += dist(mouseX, mouseY, mx[num-1], my[num-1]);
+      else screenRotation -= dist(mouseX, mouseY, mx[num-1], my[num-1]);
     }
   }
 }
@@ -226,11 +236,7 @@ void mousePressed() {
     Target t = targets.get(trialIndex);
     float x = width / 2 + t.x + screenTransX;
     float y = height / 2 + t.y + screenTransY;
-    if(inSquare(mouseX, mouseY, x, y, t.z))
-    {
-      moveSquare = true;
-    }
-    else if(dist(width/2, height, mouseX, mouseY) < inchesToPixels(.5f)) {
+    if(mouseY >= (height - 100)) {
       if (userDone==false && !checkForSuccess())
         errorCount++;
   
