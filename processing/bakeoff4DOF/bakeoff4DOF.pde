@@ -15,7 +15,7 @@ int num = 3;
 float mx[] = new float[num];
 float my[] = new float[num];
 
-int trialCount = 4; //this will be set higher for the bakeoff
+int trialCount = 20; //this will be set higher for the bakeoff
 float border = 0; //have some padding from the sides
 int trialIndex = 0; //what trial are we on
 int errorCount = 0;  //used to keep track of errors
@@ -24,7 +24,7 @@ int startTime = 0; // time starts when the first click is captured
 int finishTime = 0; //records the time of the final click
 boolean userDone = false;
 
-final int screenPPI = 577; //what is the DPI of the screen you are using
+final int screenPPI = 518; //what is the DPI of the screen you are using
 //Many phones listed here: https://en.wikipedia.org/wiki/Comparison_of_high-definition_smartphone_displays 
 
 private class Target
@@ -44,7 +44,7 @@ float inchesToPixels(float inch)
 
 void setup() {
   //size does not let you use variables, so you have to manually compute this
-  size(1154, 2020); //set this, based on your sceen's PPI to be a 2x3.5" area.
+  size(1036, 1813); //set this, based on your sceen's PPI to be a 2x3.5" area.
 
   rectMode(CENTER);
   textFont(createFont("Arial", inchesToPixels(.15f))); //sets the font to Arial that is .3" tall
@@ -72,9 +72,6 @@ void draw() {
   background(0); //background is dark grey
   fill(255);
   noStroke();
-
-  if (startTime == 0)
-    startTime = millis();
 
   if (userDone)
   {
@@ -131,10 +128,10 @@ void draw() {
   text("Trial " + (trialIndex+1) + " of " +trialCount, width/2, inchesToPixels(.2f));
   if(checkForSuccess()) fill(0,200,0);
   else fill(200,0,0);
-  rect(width/2, height-50, width - 50, 75);
+  rect(width/2, height-125, width - 50, 200);
   fill(255);
-  textSize(50);
-  text("Next", width/2 ,height-37.5);
+  textSize(125);
+  text("Next", width/2 ,height-90);
   
   
   //===========DRAW TARGET SQUARE=================
@@ -142,7 +139,7 @@ void draw() {
   translate(width/2, height/2); //center the drawing coordinates to the center of the screen
 
   Target t = targets.get(trialIndex);
-  float newSize = t.z * 3;
+  float newSize = t.z * 2;
 
   translate(t.x, t.y); //center the drawing coordinates to the center of the screen
   translate(screenTransX, screenTransY); //center the drawing coordinates to the center of the screen
@@ -204,7 +201,7 @@ void mouseDragged() {
   if(trialIndex < targets.size())
   {
     Target t = targets.get(trialIndex);
-    float newSize = 3 * t.z;
+    float newSize = 2 * t.z;
     float x = width / 2 + t.x + screenTransX;
     float y = height / 2 + t.y + screenTransY;
     float vecx1 = mx[num-2] - x;
@@ -231,6 +228,11 @@ void mouseDragged() {
 }
 
 void mousePressed() {
+  if (startTime == 0) //start time on the instant of the first user action    
+  {     
+    startTime = millis();      
+    println("time started!");    
+  }
   if(trialIndex < targets.size())
   {
     Target t = targets.get(trialIndex);
@@ -240,7 +242,7 @@ void mousePressed() {
     {
       moveSquare = true;
     }
-    else if(mouseY >= (height - 100)) {
+    else if(mouseY >= (height - 150)) {
       if (userDone==false && !checkForSuccess())
         errorCount++;
   
