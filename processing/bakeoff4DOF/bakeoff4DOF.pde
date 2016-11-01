@@ -224,8 +224,8 @@ void mouseDragged() {
       t.z+=dist(mouseX,mouseY,x,y)-(newSize/2.0);
     }
     else if (inCircle(mouseX, mouseY, x, y, newSize) && !inSquare(mouseX, mouseY, x, y, t.z)) { 
-      if (crossprod > 0) screenRotation += dist(mouseX, mouseY, mx[num-1], my[num-1]);
-      else screenRotation -= dist(mouseX, mouseY, mx[num-1], my[num-1]);
+      if (crossprod > 0) screenRotation += 2.5;
+      else screenRotation -= 2.5;
     }
   }
 }
