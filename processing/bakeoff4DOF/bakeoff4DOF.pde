@@ -83,6 +83,9 @@ void draw() {
   fill(255);
   noStroke();
 
+  //if (startTime == 0)
+  //  startTime = millis();
+
   if (userDone)
   {
     textSize(52);
@@ -184,10 +187,18 @@ void draw() {
   rect(width/2, height - 300, width - 50, 50);
   rotating.x = (t.rotation / 90) * (width - 100) + 50;
   rotating.y = height - 300;
+  float temp1 = (width - 100) + 50;
+  float temp2 = 50;
   fill(0,0,255);
   rect(rotating.x, rotating.y, 50, 50);
+  fill(127);
   
-  //sizing
+  if (abs(rotating.x - temp1) > abs(rotating.x - temp2)) rect(temp2, rotating.y, 50, 50);
+  else rect(temp1, rotating.y, 50, 50);
+  
+  //rect((width - 100) + 50, rotating.y, 50, 50);
+  
+  //resizing
   fill(127);
   text("Resize", width/2, height - 225);
   fill(255);
@@ -196,6 +207,9 @@ void draw() {
   sizing.y = height - 200;
   fill(0,0,255);
   rect(sizing.x, sizing.y, 50, 50);
+  
+  fill(127);
+  rect((screenZ / 900) * (width - 100) + 50, sizing.y, 50, 50);
 }
 
 boolean inCircle(float x1, float y1, float x2, float y2, float size) {
@@ -263,22 +277,8 @@ void mouseDragged() {
       }
       else if (inSize(mouseX,mouseY)) {
         t.z += (mouseX - mx[num-1]) / (width - 50) * 900;
-      //else if (inCircle(mouseX, mouseY, x, y, newSize) && !inSquare(mouseX, mouseY, x, y, t.z)) { 
-      //  if (crossprod > 0) screenRotation += 1.0;
-      //  else screenRotation -= 1.0;
-      //>>> 44aed7c99b0c777ef852d56034ab50f620b3e9be
       }
     }
-    //else if(onCircle(mx[num-1], my[num-1], x, y, newSize) && !onCircle(mouseX, mouseY, x, y, newSize) && inCircle(mouseX, mouseY, x, y, newSize)) {
-    //  t.z-=(newSize/2.0)-dist(mouseX,mouseY,x,y);
-    //}
-    //else if(onCircle(mx[num-1], my[num-1], x, y, newSize) && !inCircle(mouseX, mouseY, x, y, newSize)) {
-    //  t.z+=dist(mouseX,mouseY,x,y)-(newSize/2.0);
-    //}
-    //else if (inCircle(mouseX, mouseY, x, y, newSize) && !inSquare(mouseX, mouseY, x, y, t.z)) { 
-    //  if (crossprod > 0) screenRotation += 1.0;
-    //  else screenRotation -= 1.0;
-    //}
   }
 }
 
