@@ -57,8 +57,7 @@ float inchesToPixels(float inch)
 
 void setup() {
   //size does not let you use variables, so you have to manually compute this
-  size(400,700);
-  //size(1154, 2019); //set this, based on your sceen's PPI to be a 2x3.5" area.
+  size(1154, 2020); //set this, based on your sceen's PPI to be a 2x3.5" area.
 
   rectMode(CENTER);
   textFont(createFont("Arial", inchesToPixels(.15f))); //sets the font to Arial that is .3" tall
@@ -268,10 +267,6 @@ void mouseDragged() {
     else if (inRotate(mouseX,mouseY)) {
       rotating.x += (mouseX - mx[num-1]);
       t.rotation += (mouseX - mx[num-1]) / (width - 50) * 90;   
-    }
-    else if (inSize(mouseX,mouseY)) {
-      sizing.x += (mouseX - mx[num-1]);
-      t.z += (mouseX - mx[num-1]) / (width - 50) * 900;
     }
     //else if(onCircle(mx[num-1], my[num-1], x, y, newSize) && !onCircle(mouseX, mouseY, x, y, newSize) && inCircle(mouseX, mouseY, x, y, newSize)) {
     //  t.z-=(newSize/2.0)-dist(mouseX,mouseY,x,y);
