@@ -23,6 +23,7 @@ float errorPenalty = 0.5f; //for every error, add this to mean time
 int startTime = 0; // time starts when the first click is captured
 int finishTime = 0; //records the time of the final click
 boolean userDone = false;
+float permrot = 0;
 
 
 
@@ -76,6 +77,7 @@ void setup() {
     t.z = ((i%20  )+1)*inchesToPixels(.15f); //increasing size from .15 up to 3.0"
     targets.add(t);
     println("created target with " + t.x + "," + t.y + "," + t.rotation + "," + t.z);
+    permrot = t.rotation;
   }
 
   Collections.shuffle(targets); // randomize the order of the button; don't change this.
@@ -187,34 +189,31 @@ void draw() {
   //rotation
   textSize(50);
   fill(127);
-  text("Rotate", width/2, height - 325);
+  text("Rotate", width/2, height - 525);
   fill(255);
-  rect(width/2, height - 300, width - 50, 50);
-  rotating.x = (t.rotation / 90) * (width - 100) + 50;
-  rotating.y = height - 300;
-  float temp1 = (width - 100) + 50;
-  float temp2 = 50;
+  rect(width/2, height - 500, width - 100, 100);
+  rotating.x = (t.rotation - permrot) + 100;
+  rotating.y = height - 500;
   fill(0,0,255);
-  rect(rotating.x, rotating.y, 50, 50);
+  rect(rotating.x, rotating.y, 100, 100);
   fill(127);
   
-  if (abs(rotating.x - temp1) > abs(rotating.x - temp2)) rect(temp2, rotating.y, 50, 50);
-  else rect(temp1, rotating.y, 50, 50);
+  rect(90 - permrot + 100, rotating.y, 100, 100);
   
   //rect((width - 100) + 50, rotating.y, 50, 50);
   
   //resizing
   fill(127);
-  text("Resize", width/2, height - 225);
+  text("Resize", width/2, height - 325);
   fill(255);
-  rect(width/2, height - 200, width - 50, 50);
-  sizing.x = (t.z / 900) * (width - 100) + 50;
-  sizing.y = height - 200;
+  rect(width/2, height - 300, width - 100, 100);
+  sizing.x = (t.z / 900) * (width - 100) + 100;
+  sizing.y = height - 300;
   fill(0,0,255);
-  rect(sizing.x, sizing.y, 50, 50);
+  rect(sizing.x, sizing.y, 100, 100);
   
   fill(127);
-  rect((screenZ / 900) * (width - 100) + 50, sizing.y, 50, 50);
+  rect((screenZ / 900) * (width - 100) + 100, sizing.y, 100, 100);
 }
 
 boolean inCircle(float x1, float y1, float x2, float y2, float size) {
@@ -233,12 +232,12 @@ boolean inSquare(float x2, float y2, float x1, float y1, float size) {
 }
 
 boolean inRotate(float x1, float y1) {
-  if (x1 >= 25 && x1 <= width - 25 && y1 <= height - 275 && y1 >= height - 325) return true;
+  if (x1 >= 25 && x1 <= width - 25 && y1 <= height - 475 && y1 >= height - 525) return true;
   return false;
 }
 
 boolean inSize(float x1, float y1) {
-  if (x1 >= 25 && x1 <= width - 25 && y1 <= height - 175 && y1 >= height - 225) return true;
+  if (x1 >= 25 && x1 <= width - 25 && y1 <= height - 275 && y1 >= height - 325) return true;
   return false;
 }
 
@@ -278,7 +277,7 @@ void mouseDragged() {
     }
     else {
       if (inRotate(mouseX,mouseY)) {
-        t.rotation += (mouseX - mx[num-1]) / (width - 50) * 90;   
+        t.rotation += (mouseX - mx[num-1]);
       }
       else if (inSize(mouseX,mouseY)) {
         t.z += (mouseX - mx[num-1]) / (width - 50) * 900;
