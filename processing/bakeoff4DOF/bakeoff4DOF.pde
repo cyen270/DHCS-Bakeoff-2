@@ -26,7 +26,7 @@ boolean userDone = false;
 
 
 
-final int screenPPI = 200; //what is the DPI of the screen you are using
+final int screenPPI = 577; //what is the DPI of the screen you are using
 //final int screenPPI = 577; //what is the DPI of the screen you are using
 //Many phones listed here: https://en.wikipedia.org/wiki/Comparison_of_high-definition_smartphone_displays 
 
