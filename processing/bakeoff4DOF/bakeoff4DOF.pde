@@ -26,8 +26,8 @@ boolean userDone = false;
 
 
 
-//final int screenPPI = 200; //what is the DPI of the screen you are using
-final int screenPPI = 577; //what is the DPI of the screen you are using
+final int screenPPI = 200; //what is the DPI of the screen you are using
+//final int screenPPI = 577; //what is the DPI of the screen you are using
 //Many phones listed here: https://en.wikipedia.org/wiki/Comparison_of_high-definition_smartphone_displays 
 
 private class Target
@@ -57,8 +57,8 @@ float inchesToPixels(float inch)
 
 void setup() {
   //size does not let you use variables, so you have to manually compute this
-  //size(400,700);
-  size(1154, 2019); //set this, based on your sceen's PPI to be a 2x3.5" area.
+  size(400,700);
+  //size(1154, 2019); //set this, based on your sceen's PPI to be a 2x3.5" area.
 
   rectMode(CENTER);
   textFont(createFont("Arial", inchesToPixels(.15f))); //sets the font to Arial that is .3" tall
