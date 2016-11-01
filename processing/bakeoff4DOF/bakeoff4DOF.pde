@@ -87,8 +87,8 @@ void draw() {
   fill(255);
   noStroke();
 
-  if (startTime == 0)
-    startTime = millis();
+  //if (startTime == 0)
+  //  startTime = millis();
 
   if (userDone)
   {
@@ -192,10 +192,16 @@ void draw() {
   rect(width/2, height - 300, width - 50, 50);
   rotating.x = (t.rotation / 90) * (width - 100) + 50;
   rotating.y = height - 300;
+  float temp1 = (width - 100) + 50;
+  float temp2 = 50;
   fill(0,0,255);
   rect(rotating.x, rotating.y, 50, 50);
   fill(127);
-  rect((width - 100) + 50, rotating.y, 50, 50);
+  
+  if (abs(rotating.x - temp1) > abs(rotating.x - temp2)) rect(temp2, rotating.y, 50, 50);
+  else rect(temp1, rotating.y, 50, 50);
+  
+  //rect((width - 100) + 50, rotating.y, 50, 50);
   
   //resizing
   fill(127);
@@ -296,6 +302,11 @@ void mouseDragged() {
 }
 
 void mousePressed() {
+  if (startTime == 0) //start time on the instant of the first user action    
+  {     
+    startTime = millis();      
+    println("time started!");    
+  }
   if(trialIndex < targets.size())
   {
     Target t = targets.get(trialIndex);
