@@ -26,7 +26,7 @@ boolean userDone = false;
 
 
 
-final int screenPPI = 577; //what is the DPI of the screen you are using
+final int screenPPI = 200; //what is the DPI of the screen you are using
 //final int screenPPI = 577; //what is the DPI of the screen you are using
 //Many phones listed here: https://en.wikipedia.org/wiki/Comparison_of_high-definition_smartphone_displays 
 
@@ -57,7 +57,8 @@ float inchesToPixels(float inch)
 
 void setup() {
   //size does not let you use variables, so you have to manually compute this
-  size(1154, 2020); //set this, based on your sceen's PPI to be a 2x3.5" area.
+  size(400,700);
+  //size(1154, 2019); //set this, based on your sceen's PPI to be a 2x3.5" area.
 
   rectMode(CENTER);
   textFont(createFont("Arial", inchesToPixels(.15f))); //sets the font to Arial that is .3" tall
@@ -71,7 +72,7 @@ void setup() {
     Target t = new Target();
     t.x = random(-width/2+border, width/2-border); //set a random x with some padding
     t.y = random(-height/2+border, height/2-border); //set a random y with some padding
-    t.rotation = random(0, 360); //random rotation between 0 and 360
+    t.rotation = random(0, 90); //random rotation between 0 and 360
     t.z = ((i%20  )+1)*inchesToPixels(.15f); //increasing size from .15 up to 3.0"
     targets.add(t);
     println("created target with " + t.x + "," + t.y + "," + t.rotation + "," + t.z);
@@ -155,7 +156,7 @@ void draw() {
   translate(width/2, height/2); //center the drawing coordinates to the center of the screen
 
   Target t = targets.get(trialIndex);
-  float newSize = t.z * 3;
+  //float newSize = t.z * 3;
 
   translate(t.x, t.y); //center the drawing coordinates to the center of the screen
   translate(screenTransX, screenTransY); //center the drawing coordinates to the center of the screen
@@ -188,8 +189,8 @@ void draw() {
   fill(127);
   text("Rotate", width/2, height - 325);
   fill(255);
-  rect(width/2, height - 300, width, 50);
-  rotating.x = abs((t.rotation % 90) / 90) * (width - 50) + 50;
+  rect(width/2, height - 300, width - 50, 50);
+  rotating.x = (t.rotation / 90) * (width - 100) + 50;
   rotating.y = height - 300;
   fill(0,0,255);
   rect(rotating.x, rotating.y, 50, 50);
@@ -198,8 +199,8 @@ void draw() {
   fill(127);
   text("Resize", width/2, height - 225);
   fill(255);
-  rect(width/2, height - 200, width, 50);
-  sizing.x = (t.z / 900) * (width - 50) + 50;
+  rect(width/2, height - 200, width - 50, 50);
+  sizing.x = (t.z / 900) * (width - 100) + 50;
   sizing.y = height - 200;
   fill(0,0,255);
   rect(sizing.x, sizing.y, 50, 50);
@@ -260,13 +261,21 @@ void mouseDragged() {
     float vecy2 = my[num-1] - y;
     float crossprod = vecx1 * vecy2 - vecy1 * vecx2;
     
-    if(moveSquare && !inRotate(mouseX,mouseY) && !inSize(mouseX,mouseY)) {
+    if(moveSquare) {
       screenTransX = mouseX - (width / 2 + t.x);
       screenTransY = mouseY - (height / 2 + t.y);
     }
-    else if (inRotate(mouseX,mouseY)) {
-      rotating.x += (mouseX - mx[num-1]);
-      t.rotation += (mouseX - mx[num-1]) / (width - 50) * 90;   
+    else {
+      if (inRotate(mouseX,mouseY)) {
+        t.rotation += (mouseX - mx[num-1]) / (width - 50) * 90;   
+      }
+      else if (inSize(mouseX,mouseY)) {
+        t.z += (mouseX - mx[num-1]) / (width - 50) * 900;
+      //else if (inCircle(mouseX, mouseY, x, y, newSize) && !inSquare(mouseX, mouseY, x, y, t.z)) { 
+      //  if (crossprod > 0) screenRotation += 1.0;
+      //  else screenRotation -= 1.0;
+      //>>> 44aed7c99b0c777ef852d56034ab50f620b3e9be
+      }
     }
     //else if(onCircle(mx[num-1], my[num-1], x, y, newSize) && !onCircle(mouseX, mouseY, x, y, newSize) && inCircle(mouseX, mouseY, x, y, newSize)) {
     //  t.z-=(newSize/2.0)-dist(mouseX,mouseY,x,y);
@@ -287,7 +296,11 @@ void mousePressed() {
     Target t = targets.get(trialIndex);
     float x = width / 2 + t.x + screenTransX;
     float y = height / 2 + t.y + screenTransY;
-    if(inSquare(mouseX, mouseY, x, y, t.z))
+    
+    if (inRotate(mouseX,mouseY) || inSize(mouseX,mouseY)) {
+      moveSquare = false;
+    }
+    else if (inSquare(mouseX, mouseY, x, y, t.z))
     {
       moveSquare = true;
     }
