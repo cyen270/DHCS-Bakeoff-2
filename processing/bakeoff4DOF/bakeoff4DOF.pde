@@ -24,6 +24,9 @@ int startTime = 0; // time starts when the first click is captured
 int finishTime = 0; //records the time of the final click
 boolean userDone = false;
 
+
+
+//final int screenPPI = 200; //what is the DPI of the screen you are using
 final int screenPPI = 577; //what is the DPI of the screen you are using
 //Many phones listed here: https://en.wikipedia.org/wiki/Comparison_of_high-definition_smartphone_displays 
 
@@ -35,6 +38,16 @@ private class Target
   float z = 0;
 }
 
+private class Bar 
+{
+  float x = 0;
+  float y = 0;
+}
+
+
+Bar sizing = new Bar();
+Bar rotating = new Bar();
+
 ArrayList<Target> targets = new ArrayList<Target>();
 
 float inchesToPixels(float inch)
@@ -44,6 +57,7 @@ float inchesToPixels(float inch)
 
 void setup() {
   //size does not let you use variables, so you have to manually compute this
+  //size(400,700);
   size(1154, 2019); //set this, based on your sceen's PPI to be a 2x3.5" area.
 
   rectMode(CENTER);
@@ -59,7 +73,7 @@ void setup() {
     t.x = random(-width/2+border, width/2-border); //set a random x with some padding
     t.y = random(-height/2+border, height/2-border); //set a random y with some padding
     t.rotation = random(0, 360); //random rotation between 0 and 360
-    t.z = ((i%20)+1)*inchesToPixels(.15f); //increasing size from .15 up to 3.0"
+    t.z = ((i%20  )+1)*inchesToPixels(.15f); //increasing size from .15 up to 3.0"
     targets.add(t);
     println("created target with " + t.x + "," + t.y + "," + t.rotation + "," + t.z);
   }
@@ -131,10 +145,10 @@ void draw() {
   text("Trial " + (trialIndex+1) + " of " +trialCount, width/2, inchesToPixels(.2f));
   if(checkForSuccess()) fill(0,200,0);
   else fill(200,0,0);
-  rect(width/2, height-50, width - 50, 75);
+  rect(width/2, height-100, width - 50, 100);
   fill(255);
-  textSize(50);
-  text("Next", width/2 ,height-37.5);
+  textSize(75);
+  text("Next", width/2 ,height-50);
   
   
   //===========DRAW TARGET SQUARE=================
@@ -150,11 +164,11 @@ void draw() {
   rotate(radians(t.rotation+screenRotation));
   fill(255);
   
-  noFill();
-  stroke(255, 200, 0);
-  strokeWeight(5);
-  ellipse(0, 0, newSize, newSize);
-  noStroke();
+  //noFill();
+  //stroke(255, 200, 0);
+  //strokeWeight(5);
+  //ellipse(0, 0, newSize, newSize);
+  //noStroke();
   if(checkForSuccess())
   {
     fill(0, 255, 0);  
@@ -166,6 +180,30 @@ void draw() {
   rect(0, 0, t.z, t.z);
 
   popMatrix();
+  
+  
+  
+  
+  //rotation
+  textSize(50);
+  fill(127);
+  text("Rotate", width/2, height - 325);
+  fill(255);
+  rect(width/2, height - 300, width, 50);
+  rotating.x = abs((t.rotation % 90) / 90) * (width - 50) + 50;
+  rotating.y = height - 300;
+  fill(0,0,255);
+  rect(rotating.x, rotating.y, 50, 50);
+  
+  //sizing
+  fill(127);
+  text("Resize", width/2, height - 225);
+  fill(255);
+  rect(width/2, height - 200, width, 50);
+  sizing.x = (t.z / 900) * (width - 50) + 50;
+  sizing.y = height - 200;
+  fill(0,0,255);
+  rect(sizing.x, sizing.y, 50, 50);
 }
 
 boolean inCircle(float x1, float y1, float x2, float y2, float size) {
@@ -180,6 +218,16 @@ boolean onCircle(float x1, float y1, float x2, float y2, float size) {
 
 boolean inSquare(float x2, float y2, float x1, float y1, float size) {
   if ((abs(x2 - x1) <= size * sqrt(2) / 2.0) && (abs(y2 - y1) <= size * sqrt(2) / 2.0)) return true;
+  return false;
+}
+
+boolean inRotate(float x1, float y1) {
+  if (x1 >= 25 && x1 <= width - 25 && y1 <= height - 275 && y1 >= height - 325) return true;
+  return false;
+}
+
+boolean inSize(float x1, float y1) {
+  if (x1 >= 25 && x1 <= width - 25 && y1 <= height - 175 && y1 >= height - 225) return true;
   return false;
 }
 
@@ -213,20 +261,28 @@ void mouseDragged() {
     float vecy2 = my[num-1] - y;
     float crossprod = vecx1 * vecy2 - vecy1 * vecx2;
     
-    if(moveSquare) {
+    if(moveSquare && !inRotate(mouseX,mouseY) && !inSize(mouseX,mouseY)) {
       screenTransX = mouseX - (width / 2 + t.x);
       screenTransY = mouseY - (height / 2 + t.y);
     }
-    else if(onCircle(mx[num-1], my[num-1], x, y, newSize) && !onCircle(mouseX, mouseY, x, y, newSize) && inCircle(mouseX, mouseY, x, y, newSize)) {
-      t.z-=(newSize/2.0)-dist(mouseX,mouseY,x,y);
+    else if (inRotate(mouseX,mouseY)) {
+      rotating.x += (mouseX - mx[num-1]);
+      t.rotation += (mouseX - mx[num-1]) / (width - 50) * 90;   
     }
-    else if(onCircle(mx[num-1], my[num-1], x, y, newSize) && !inCircle(mouseX, mouseY, x, y, newSize)) {
-      t.z+=dist(mouseX,mouseY,x,y)-(newSize/2.0);
+    else if (inSize(mouseX,mouseY)) {
+      sizing.x += (mouseX - mx[num-1]);
+      t.z += (mouseX - mx[num-1]) / (width - 50) * 900;
     }
-    else if (inCircle(mouseX, mouseY, x, y, newSize) && !inSquare(mouseX, mouseY, x, y, t.z)) { 
-      if (crossprod > 0) screenRotation += 2.5;
-      else screenRotation -= 2.5;
-    }
+    //else if(onCircle(mx[num-1], my[num-1], x, y, newSize) && !onCircle(mouseX, mouseY, x, y, newSize) && inCircle(mouseX, mouseY, x, y, newSize)) {
+    //  t.z-=(newSize/2.0)-dist(mouseX,mouseY,x,y);
+    //}
+    //else if(onCircle(mx[num-1], my[num-1], x, y, newSize) && !inCircle(mouseX, mouseY, x, y, newSize)) {
+    //  t.z+=dist(mouseX,mouseY,x,y)-(newSize/2.0);
+    //}
+    //else if (inCircle(mouseX, mouseY, x, y, newSize) && !inSquare(mouseX, mouseY, x, y, t.z)) { 
+    //  if (crossprod > 0) screenRotation += 1.0;
+    //  else screenRotation -= 1.0;
+    //}
   }
 }
 
@@ -269,7 +325,7 @@ void mousePressed() {
 //    screenZ+=inchesToPixels(.02f);
 
 //  text("-", width-inchesToPixels(.2f), height/2+inchesToPixels(.5f));
-//  if (mousePressed && dist(width, height/2, mouseX, mouseY)<inchesToPixels(.5f))
+//  if (mousePressed && dist(width, height/2, mouseX, mouseY)<inchesToxels(.5f))
 //    screenZ-=inchesToPixels(.02f);
 //}
 
@@ -301,16 +357,16 @@ public boolean checkForSize()
 
 public boolean checkForSuccess()
 {
-	Target t = targets.get(trialIndex);	
-	boolean closeDist = dist(t.x,t.y,-screenTransX,-screenTransY)<inchesToPixels(.05f); //has to be within .1"
+  Target t = targets.get(trialIndex);  
+  boolean closeDist = dist(t.x,t.y,-screenTransX,-screenTransY)<inchesToPixels(.05f); //has to be within .1"
   boolean closeRotation = calculateDifferenceBetweenAngles(t.rotation+screenRotation,0)<=5;
-	boolean closeZ = abs(t.z - screenZ)<inchesToPixels(.05f); //has to be within .1"	
-	
+  boolean closeZ = abs(t.z - screenZ)<inchesToPixels(.05f); //has to be within .1"  
+  
   //println("Close Enough Distance: " + closeDist);
   //println("Close Enough Rotation: " + closeRotation + "(dist="+calculateDifferenceBetweenAngles(t.rotation,0)+")");
-	//println("Close Enough Z: " + closeZ);
-	
-	return closeDist && closeRotation && closeZ;	
+  //println("Close Enough Z: " + closeZ);
+  
+  return closeDist && closeRotation && closeZ;  
 }
 
 double calculateDifferenceBetweenAngles(float a1, float a2)
