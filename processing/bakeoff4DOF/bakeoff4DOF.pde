@@ -194,8 +194,10 @@ void draw() {
   rotating.y = height - 300;
   fill(0,0,255);
   rect(rotating.x, rotating.y, 50, 50);
+  fill(127);
+  rect((width - 100) + 50, rotating.y, 50, 50);
   
-  //sizing
+  //resizing
   fill(127);
   text("Resize", width/2, height - 225);
   fill(255);
@@ -204,6 +206,9 @@ void draw() {
   sizing.y = height - 200;
   fill(0,0,255);
   rect(sizing.x, sizing.y, 50, 50);
+  
+  fill(127);
+  rect((screenZ / 900) * (width - 100) + 50, sizing.y, 50, 50);
 }
 
 boolean inCircle(float x1, float y1, float x2, float y2, float size) {
